@@ -1,0 +1,37 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+	package
+		ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:11-36
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+	android:versionCode
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml:1:1-38
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+uses-sdk
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		ADDED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
+		INJECTED from /Users/yanghe/nonda/android/github/AIDemo/models/src/main/AndroidManifest.xml
