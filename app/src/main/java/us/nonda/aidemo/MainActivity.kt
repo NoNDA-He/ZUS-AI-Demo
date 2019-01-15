@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResult(result: String?) {
         tvResult.append(resources.getString(R.string.result, result))
+        tvResult.append(System.lineSeparator())
     }
 
     override fun onDestroy() {

@@ -27,6 +27,7 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
             .recognizer
         recognizer?.addListener(this)
 
+        recognizer?.addKeyphraseSearch(KWS_SEARCH, KEYWORD)
         val keyGrammar = File(assetDir, "key.gram")
         recognizer?.addKeywordSearch(KWS_SEARCH, keyGrammar)
     }
@@ -55,9 +56,9 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
         if (hypothesis == null)
             return
         val text = hypothesis.hypstr
+        callback?.onResult(text)
         if (text == KWS_SEARCH) {
             println("wake up")
-            callback?.onResult("")
         }
     }
 
@@ -69,10 +70,13 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     }
 
     override fun onEndOfSpeech() {
+        callback?.onResult("onEnd")
+        print("onEndOfSpeech")
     }
 
-    override fun onError(p0: Exception?) {
-
+    override fun onError(e: Exception?) {
+        callback?.onResult("onError")
+        print("onError ${e.toString()}")
     }
 
     private fun setupRecognizer(assetDir: File?) {
@@ -82,6 +86,6 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     companion object {
         /* Named searches allow to quickly reconfigure the decoder */
         const val KWS_SEARCH = "wakeup"
-        const val KEYWORD = "take photo"
+        const val KEYWORD = "hi zeus"
     }
 }
