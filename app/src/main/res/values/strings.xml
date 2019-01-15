@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">语音控制Demo</string>
-    <string name="to_start_demonstration">to start demonstration say: %s</string>
+    <string name="to_start_demonstration">to start just say: hi ZUS</string>
     <string name="result">result: %s</string>
 </resources>

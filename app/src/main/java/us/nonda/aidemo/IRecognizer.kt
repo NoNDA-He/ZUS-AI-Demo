@@ -9,5 +9,4 @@ interface IRecognizer{
     fun startListening()
     fun stopListening()
     fun destroy()
-    fun setCallback(callback: IRecognizerCallback)
 }

@@ -11,9 +11,10 @@ import java.io.File
 class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionListener {
 
     private var recognizer: SpeechRecognizer? = null
-    private var callback: IRecognizerCallback? = null
+    private var callback: IPocketsphinxCallback? = null
+    var hasWakeUp = false
 
-    override fun setCallback(callback: IRecognizerCallback) {
+    fun setCallback(callback: IPocketsphinxCallback) {
         this.callback = callback
     }
 
@@ -48,16 +49,22 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     }
 
     override fun onResult(hypothesis: Hypothesis?) {
-        println(hypothesis?.hypstr)
-        callback?.onResult(hypothesis?.hypstr)
+        if (hypothesis == null) return
+        if (hasWakeUp) return
+        handleResult(hypothesis.hypstr)
     }
 
     override fun onPartialResult(hypothesis: Hypothesis?) {
-        if (hypothesis == null)
-            return
-        val text = hypothesis.hypstr
-        callback?.onResult(text)
-        if (text == KWS_SEARCH) {
+        if (hypothesis == null) return
+        if (hasWakeUp) return
+        handleResult(hypothesis.hypstr)
+    }
+
+    private fun handleResult(text: String?) {
+        if (text == null) return
+        if (text.contains(KEYWORD)) {
+            hasWakeUp = true
+            callback?.onWakeUp()
             println("wake up")
         }
     }
@@ -70,17 +77,15 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     }
 
     override fun onEndOfSpeech() {
-        callback?.onResult("onEnd")
         print("onEndOfSpeech")
     }
 
     override fun onError(e: Exception?) {
-        callback?.onResult("onError")
         print("onError ${e.toString()}")
     }
 
-    private fun setupRecognizer(assetDir: File?) {
-
+    interface IPocketsphinxCallback {
+        fun onWakeUp()
     }
 
     companion object {

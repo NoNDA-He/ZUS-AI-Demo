@@ -34,9 +34,10 @@ class MainActivity : AppCompatActivity() {
     private fun initRecognizer() {
         pocketsphinxRecognizer = PocketsphinxRecognizer(baseContext)
         pocketsphinxRecognizer?.create()
-        pocketsphinxRecognizer?.setCallback(object : IRecognizerCallback {
-            override fun onResult(result: String?) {
-                showResult(result)
+        pocketsphinxRecognizer?.setCallback(object : PocketsphinxRecognizer.IPocketsphinxCallback {
+            override fun onWakeUp() {
+                pocketsphinxRecognizer?.stopListening()
+                showResult("Im back!!!")
             }
         })
         startWakeUp()
@@ -48,12 +49,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startDemonstration() {
-        tvResult.append(resources.getString(R.string.to_start_demonstration, PocketsphinxRecognizer.KEYWORD))
+        tvResult.text = resources.getString(R.string.to_start_demonstration)
     }
 
     private fun showResult(result: String?) {
-        tvResult.append(resources.getString(R.string.result, result))
         tvResult.append(System.lineSeparator())
+        tvResult.append(result)
     }
 
     override fun onDestroy() {
