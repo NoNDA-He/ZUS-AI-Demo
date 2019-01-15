@@ -24,6 +24,7 @@ android {
 
 dependencies {
 
+    implementation project(':models')
     implementation files('libs/pocketsphinx-android-5prealpha-release.aar')
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
