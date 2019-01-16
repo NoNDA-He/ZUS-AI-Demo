@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,29 +8,39 @@
         tools:context=".MainActivity">
 
     <LinearLayout
+            android:id="@+id/ll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+    >
 
         <TextView
                 android:id="@+id/tvResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                tools:text="Fuck"
                 android:textSize="30sp"/>
 
         <jaygoo.widget.wlv.WaveLineView
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:id="@+id/waveView"
-                app:wlvMoveSpeed="300"
-        />
-
+                app:wlvMoveSpeed="300"/>
 
     </LinearLayout>
 
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/ll">
+        <TextView
+                android:id="@+id/tvLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                tools:text="log"
+        />
+    </ScrollView>
 
-</android.support.constraint.ConstraintLayout>
+
+</RelativeLayout>

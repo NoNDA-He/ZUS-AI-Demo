@@ -63,6 +63,8 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
         if (text.contains(KEYWORD)) {
             stopListening()
             callback?.onWakeUp()
+        }else {
+            callback?.showLog(text)
         }
     }
 
@@ -81,11 +83,12 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
 
     interface IPocketsphinxCallback {
         fun onWakeUp()
+        fun showLog(log: String)
     }
 
     companion object {
         /* Named searches allow to quickly reconfigure the decoder */
         const val KWS_SEARCH = "wakeup"
-        const val KEYWORD = "zeus"
+        const val KEYWORD = "hi"
     }
 }

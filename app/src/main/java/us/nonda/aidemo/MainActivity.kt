@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity() {
                 waveView.visibility = View.VISIBLE
                 waveView.startAnim()
             }
+
+            override fun showLog(log: String) {
+                showLogResult(log)
+            }
         })
         googleVoiceRecognizer = GoogleVoiceRecognizer(baseContext)
         googleVoiceRecognizer?.create()
@@ -70,7 +74,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun recordResult(result: String) {
-        print(result)
+        showLogResult(result)
         if (result.contains("have") && result.contains("check")) {
             takeCheck = true
         }
@@ -89,6 +93,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResult(result: String?) {
         tvResult.text = result
+    }
+
+    private fun showLogResult(log: String) {
+        tvLog.append(log)
+        tvLog.append(System.lineSeparator())
     }
 
     override fun onDestroy() {
