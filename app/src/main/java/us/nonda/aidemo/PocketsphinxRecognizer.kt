@@ -11,12 +11,8 @@ import java.io.File
 class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionListener {
 
     private var recognizer: SpeechRecognizer? = null
-    private var callback: IPocketsphinxCallback? = null
+    var callback: IPocketsphinxCallback? = null
     var hasWakeUp = false
-
-    fun setCallback(callback: IPocketsphinxCallback) {
-        this.callback = callback
-    }
 
     override fun create() {
         val assets = Assets(context)
@@ -34,12 +30,14 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     }
 
     override fun startListening() {
+        hasWakeUp = false
         recognizer?.stop()
         recognizer?.startListening(KWS_SEARCH)
 //      recognizer?.startListening(searchName, 10000)
     }
 
     override fun stopListening() {
+        hasWakeUp = true
         recognizer?.stop()
     }
 
@@ -63,25 +61,22 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     private fun handleResult(text: String?) {
         if (text == null) return
         if (text.contains(KEYWORD)) {
-            hasWakeUp = true
+            stopListening()
             callback?.onWakeUp()
-            println("wake up")
         }
     }
 
     override fun onTimeout() {
-        startListening()
+        if (!hasWakeUp) startListening()
     }
 
     override fun onBeginningOfSpeech() {
     }
 
     override fun onEndOfSpeech() {
-        print("onEndOfSpeech")
     }
 
     override fun onError(e: Exception?) {
-        print("onError ${e.toString()}")
     }
 
     interface IPocketsphinxCallback {
@@ -91,6 +86,6 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     companion object {
         /* Named searches allow to quickly reconfigure the decoder */
         const val KWS_SEARCH = "wakeup"
-        const val KEYWORD = "hi zeus"
+        const val KEYWORD = "zeus"
     }
 }

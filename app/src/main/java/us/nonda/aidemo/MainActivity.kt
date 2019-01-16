@@ -6,14 +6,18 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.view.View
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private var pocketsphinxRecognizer: PocketsphinxRecognizer? = null
+    private var googleVoiceRecognizer: GoogleVoiceRecognizer? = null
 
     /* Used to handle permission request */
     private val PERMISSIONS_REQUEST_RECORD_AUDIO = 100
+    private var takeCheck = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,32 +38,64 @@ class MainActivity : AppCompatActivity() {
     private fun initRecognizer() {
         pocketsphinxRecognizer = PocketsphinxRecognizer(baseContext)
         pocketsphinxRecognizer?.create()
-        pocketsphinxRecognizer?.setCallback(object : PocketsphinxRecognizer.IPocketsphinxCallback {
+        pocketsphinxRecognizer?.callback = (object : PocketsphinxRecognizer.IPocketsphinxCallback {
             override fun onWakeUp() {
-                pocketsphinxRecognizer?.stopListening()
-                showResult("Im back!!!")
+                showResult("What I can do for you?")
+                googleVoiceRecognizer?.startListening()
+                takeCheck = false
+                waveView.visibility = View.VISIBLE
+                waveView.startAnim()
+            }
+        })
+        googleVoiceRecognizer = GoogleVoiceRecognizer(baseContext)
+        googleVoiceRecognizer?.create()
+        googleVoiceRecognizer?.callback = (object : GoogleVoiceRecognizer.IGoogleVoiceCallback {
+            override fun onResult(result: String) {
+                recordResult(result)
+            }
+
+            override fun onFinish() {
+                handleResult()
             }
         })
         startWakeUp()
     }
 
     private fun startWakeUp() {
+        googleVoiceRecognizer?.stopListening()
         pocketsphinxRecognizer?.startListening()
-        startDemonstration()
+        showResult(resources.getString(R.string.to_start_demonstration))
+        waveView.stopAnim()
+        waveView.visibility = View.INVISIBLE
     }
 
-    private fun startDemonstration() {
-        tvResult.text = resources.getString(R.string.to_start_demonstration)
+    private fun recordResult(result: String) {
+        print(result)
+        if (result.contains("have") && result.contains("check")) {
+            takeCheck = true
+        }
+    }
+
+    private fun handleResult() {
+        if (takeCheck) {
+            Toast.makeText(baseContext, "Ok, I will take a check", Toast.LENGTH_LONG).show()
+            showResult("ok, I will take a check")
+        } else {
+            showResult("Sorry...")
+        }
+        takeCheck = false
+        window.decorView.postDelayed({ startWakeUp() }, 2000)
     }
 
     private fun showResult(result: String?) {
-        tvResult.append(System.lineSeparator())
-        tvResult.append(result)
+        tvResult.text = result
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        waveView.release()
         pocketsphinxRecognizer?.destroy()
+        googleVoiceRecognizer?.destroy()
     }
 
     override fun onRequestPermissionsResult(
