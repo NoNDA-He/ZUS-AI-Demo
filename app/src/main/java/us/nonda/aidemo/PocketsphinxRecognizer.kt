@@ -13,6 +13,8 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
     private var recognizer: SpeechRecognizer? = null
     var callback: IPocketsphinxCallback? = null
     private var hasWakeUp = false
+    private var sameWordCount = 0
+    private var lastResult: String = ""
 
     override fun create() {
         val assets = Assets(context)
@@ -37,6 +39,8 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
 
     override fun startListening() {
         hasWakeUp = false
+        sameWordCount = 0
+        lastResult = ""
         recognizer?.stop()
         recognizer?.startListening(KWS_SEARCH)
 //      recognizer?.startListening(searchName, 10000)
@@ -95,8 +99,19 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
 
     private fun checkResultIfNeedRestart(result: String) {
         val wordSize = result.split(" ").size
-        if (wordSize > MAX_RECOGNIZED_WORD) {
+        if (wordSize > MAX_RECOGNIZED_WORD_RESULE) {
             callback?.restartIfNeeded()
+            return
+        }
+        if (lastResult == result) {
+            sameWordCount++
+        } else {
+            lastResult = result
+            sameWordCount = 1
+        }
+        if (sameWordCount > MAX_RECOGNIZED_SAME_RESULT) {
+            callback?.restartIfNeeded()
+            return
         }
     }
 
@@ -111,6 +126,7 @@ class PocketsphinxRecognizer(val context: Context) : IRecognizer, RecognitionLis
         const val KWS_SEARCH = "wakeup"
         val KEYWORD_LIST = arrayListOf("祖斯", "租斯", "嗨 祖斯")
         const val KEYWORD = "祖斯"
-        const val MAX_RECOGNIZED_WORD = 3
+        const val MAX_RECOGNIZED_WORD_RESULE = 3
+        const val MAX_RECOGNIZED_SAME_RESULT = 10
     }
 }

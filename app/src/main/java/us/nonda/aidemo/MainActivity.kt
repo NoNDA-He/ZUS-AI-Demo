@@ -49,12 +49,13 @@ class MainActivity : AppCompatActivity() {
         pocketsphinxRecognizer?.create()
         pocketsphinxRecognizer?.callback = (object : PocketsphinxRecognizer.IPocketsphinxCallback {
             override fun onWakeUp() {
-                showResult("What I can do for you?")
+                showResult("What can I do for you?")
                 googleVoiceRecognizer?.startListening()
                 takeCheck = false
                 takePhoto = false
                 waveView.visibility = View.VISIBLE
                 waveView.startAnim()
+                tvTips.visibility = View.INVISIBLE
             }
 
             override fun showLog(log: String) {
@@ -92,10 +93,11 @@ class MainActivity : AppCompatActivity() {
         showResult(resources.getString(R.string.to_start_demonstration))
         waveView.stopAnim()
         waveView.visibility = View.INVISIBLE
+        tvTips.visibility = View.VISIBLE
     }
 
     private fun recordResult(result: String) {
-        showLogResult(result)
+//        showLogResult(result)
         if (result.contains("have") && result.contains("check")) {
             takeCheck = true
         } else if (result.contains("take") && result.contains("photo")) {
@@ -113,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, "Ok, I will take a photo", Toast.LENGTH_LONG).show()
                 showResult("ok, I will take a photo")
             }
-            else -> showResult("Sorry...")
+            else -> showResult("Sorry, has no result")
         }
         takeCheck = false
         takePhoto = false
