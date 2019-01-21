@@ -1,0 +1,46 @@
+Language model created by QuickLM on Mon Jan 21 02:37:01 EST 2019
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 5 sentences and 7 words
+
+\data\
+ngram 1=7
+ngram 2=10
+ngram 3=6
+
+\1-grams:
+-0.8062 </s> -0.3010
+-0.8062 <s> -0.2109
+-1.5051 嗨 -0.2730
+-1.5051 打开 -0.2272
+-1.2041 祖斯 -0.2272
+-1.5051 租斯 -0.2272
+-1.5051 设置 -0.2272
+
+\2-grams:
+-1.0000 <s> 嗨 0.0000
+-1.0000 <s> 打开 0.0000
+-1.0000 <s> 祖斯 0.0000
+-1.0000 <s> 租斯 0.0000
+-1.0000 <s> 设置 0.0000
+-0.3010 嗨 祖斯 0.0000
+-0.3010 打开 </s> -0.3010
+-0.3010 祖斯 </s> -0.3010
+-0.3010 租斯 </s> -0.3010
+-0.3010 设置 </s> -0.3010
+
+\3-grams:
+-0.3010 <s> 嗨 祖斯
+-0.3010 <s> 打开 </s>
+-0.3010 <s> 祖斯 </s>
+-0.3010 <s> 租斯 </s>
+-0.3010 <s> 设置 </s>
+-0.3010 嗨 祖斯 </s>
+
+\end\

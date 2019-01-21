@@ -1,4 +1,12 @@
 cmudict-en-us.dict
+cn-ptm/feat.params
+cn-ptm/mdef
+cn-ptm/means
+cn-ptm/mixture_weights
+cn-ptm/noisedict
+cn-ptm/sendump
+cn-ptm/transition_matrices
+cn-ptm/variances
 digits.gram
 en-phone.dmp
 en-us-ptm/README
@@ -10,5 +18,8 @@ en-us-ptm/sendump
 en-us-ptm/transition_matrices
 en-us-ptm/variances
 key.gram
+key.list
 menu.gram
 weather.dmp
+zus-cn-mode.lm
+zus-cn.dic

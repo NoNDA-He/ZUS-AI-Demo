@@ -1,14 +1,21 @@
 package us.nonda.aidemo
 
 import android.Manifest
+import android.annotation.TargetApi
+import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +40,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         initRecognizer()
+        firstStartWakeUp()
     }
 
     private fun initRecognizer() {
@@ -50,6 +58,12 @@ class MainActivity : AppCompatActivity() {
             override fun showLog(log: String) {
                 showLogResult(log)
             }
+
+            override fun restartIfNeeded() {
+                showLogResult("Restart Pocketsphinx")
+                pocketsphinxRecognizer?.stopListening()
+                window.decorView.handler.postDelayed({startWakeUp()}, 100)
+            }
         })
         googleVoiceRecognizer = GoogleVoiceRecognizer(baseContext)
         googleVoiceRecognizer?.create()
@@ -62,7 +76,12 @@ class MainActivity : AppCompatActivity() {
                 handleResult()
             }
         })
+    }
+
+    private fun firstStartWakeUp() {
         startWakeUp()
+        showResult(resources.getString(R.string.init_pocketsphinx))
+        Handler().postDelayed({startWakeUp()}, 3000)
     }
 
     private fun startWakeUp() {
@@ -88,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             showResult("Sorry...")
         }
         takeCheck = false
-        window.decorView.postDelayed({ startWakeUp() }, 2000)
+        window.decorView.handler.postDelayed({ startWakeUp() }, 2000)
     }
 
     private fun showResult(result: String?) {
@@ -104,7 +123,10 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         waveView.release()
         pocketsphinxRecognizer?.destroy()
+        pocketsphinxRecognizer = null
         googleVoiceRecognizer?.destroy()
+        googleVoiceRecognizer = null
+        window.decorView.handler.removeCallbacksAndMessages(null)
     }
 
     override fun onRequestPermissionsResult(
@@ -121,6 +143,34 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+//        getAudioDevice()
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    fun getAudioDevice() {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        val devices = audioManager?.getDevices(AudioManager.GET_DEVICES_INPUTS)
+        showLogResult("devices count = ${devices?.size}")
+        devices?.forEach { device -> print(device) }
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    fun print(device: AudioDeviceInfo) {
+        showLogResult("device type is ${getType(device.type)}")
+    }
+
+    private fun getType(type: Int): String {
+        return when (type) {
+            3 -> "TYPE_WIRED_HEADSET"
+            15 -> "TYPE_BUILTIN_MIC"
+            18 -> "TYPE_TELEPHONY"
+            else -> "unknown type"
+        }
+    }
+
 
 }
 
