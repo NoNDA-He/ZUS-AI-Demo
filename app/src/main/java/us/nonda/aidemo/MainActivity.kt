@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     /* Used to handle permission request */
     private val PERMISSIONS_REQUEST_RECORD_AUDIO = 100
     private var takeCheck = false
+    private var takePhoto = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +52,7 @@ class MainActivity : AppCompatActivity() {
                 showResult("What I can do for you?")
                 googleVoiceRecognizer?.startListening()
                 takeCheck = false
+                takePhoto = false
                 waveView.visibility = View.VISIBLE
                 waveView.startAnim()
             }
@@ -62,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             override fun restartIfNeeded() {
                 showLogResult("Restart Pocketsphinx")
                 pocketsphinxRecognizer?.stopListening()
-                window.decorView.handler.postDelayed({startWakeUp()}, 100)
+                window.decorView.handler.postDelayed({ startWakeUp() }, 100)
             }
         })
         googleVoiceRecognizer = GoogleVoiceRecognizer(baseContext)
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     private fun firstStartWakeUp() {
         startWakeUp()
         showResult(resources.getString(R.string.init_pocketsphinx))
-        Handler().postDelayed({startWakeUp()}, 3000)
+        Handler().postDelayed({ startWakeUp() }, 3000)
     }
 
     private fun startWakeUp() {
@@ -96,17 +98,25 @@ class MainActivity : AppCompatActivity() {
         showLogResult(result)
         if (result.contains("have") && result.contains("check")) {
             takeCheck = true
+        } else if (result.contains("take") && result.contains("photo")) {
+            takePhoto = true
         }
     }
 
     private fun handleResult() {
-        if (takeCheck) {
-            Toast.makeText(baseContext, "Ok, I will take a check", Toast.LENGTH_LONG).show()
-            showResult("ok, I will take a check")
-        } else {
-            showResult("Sorry...")
+        when {
+            takeCheck -> {
+                Toast.makeText(baseContext, "Ok, I will take a check", Toast.LENGTH_LONG).show()
+                showResult("ok, I will have a check")
+            }
+            takePhoto -> {
+                Toast.makeText(baseContext, "Ok, I will take a photo", Toast.LENGTH_LONG).show()
+                showResult("ok, I will take a photo")
+            }
+            else -> showResult("Sorry...")
         }
         takeCheck = false
+        takePhoto = false
         window.decorView.handler.postDelayed({ startWakeUp() }, 2000)
     }
 

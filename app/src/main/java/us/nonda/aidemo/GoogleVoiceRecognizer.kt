@@ -61,13 +61,13 @@ class GoogleVoiceRecognizer(private val context: Context) : IRecognizer, Recogni
 
     override fun onPartialResults(results: Bundle?) {
         if (results == null) return
-        val list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        when (list) {
-            null -> print("no result")
-            else ->
-                if (!list.isEmpty()) callback?.onResult(list[0])
-                else print("no result")
-        }
+//        val list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+//        when (list) {
+//            null -> print("no result")
+//            else ->
+//                if (!list.isEmpty()) callback?.onResult(list[0])
+//                else print("no result")
+//        }
     }
 
     override fun onEvent(eventType: Int, params: Bundle?) {
