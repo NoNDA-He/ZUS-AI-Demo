@@ -2,8 +2,16 @@ package us.nonda.aidemo
 
 import android.Manifest
 import android.annotation.TargetApi
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbDeviceConnection
+import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.UsbManager
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
@@ -41,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         initRecognizer()
-        firstStartWakeUp()
+//        testUSB()
     }
 
     private fun initRecognizer() {
@@ -79,6 +87,7 @@ class MainActivity : AppCompatActivity() {
                 handleResult()
             }
         })
+        firstStartWakeUp()
     }
 
     private fun firstStartWakeUp() {
@@ -109,11 +118,11 @@ class MainActivity : AppCompatActivity() {
         when {
             takeCheck -> {
                 Toast.makeText(baseContext, "Ok, I will take a check", Toast.LENGTH_LONG).show()
-                showResult("ok, I will have a check")
+                showResult("Ok, I will have a check")
             }
             takePhoto -> {
                 Toast.makeText(baseContext, "Ok, I will take a photo", Toast.LENGTH_LONG).show()
-                showResult("ok, I will take a photo")
+                showResult("Ok, I will take a photo")
             }
             else -> showResult("Sorry, has no result")
         }
@@ -134,6 +143,9 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         waveView.release()
+        if (usbPermissionReceiver != null) {
+            unregisterReceiver(usbPermissionReceiver)
+        }
         pocketsphinxRecognizer?.destroy()
         pocketsphinxRecognizer = null
         googleVoiceRecognizer?.destroy()
@@ -158,7 +170,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-//        getAudioDevice()
+        getAudioDevice()
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -179,10 +191,105 @@ class MainActivity : AppCompatActivity() {
             3 -> "TYPE_WIRED_HEADSET"
             15 -> "TYPE_BUILTIN_MIC"
             18 -> "TYPE_TELEPHONY"
+            22 -> "TYPE_USB_HEADSET"
             else -> "unknown type"
         }
     }
 
+    var manager: UsbManager? = null
+    var usbDevice: UsbDevice? = null
+    var usbEndpointIn: UsbEndpoint? = null
+    var usbDeviceConnection: UsbDeviceConnection? = null
+    var usbPermissionReceiver: USBPermissionReceiver? = null
+
+    // vid = 8137  pid = 152
+    private fun testUSB() {
+        manager = getSystemService(Context.USB_SERVICE) as UsbManager
+        for (device in manager?.deviceList?.values!!) {
+            if (device.vendorId == 8137 && device.productId == 152) {
+                usbDevice = device
+                println(usbDevice?.deviceName)
+            }
+        }
+        if (usbDevice == null) return
+        val interfaceCount = usbDevice?.interfaceCount
+        println("interfaceCount = $interfaceCount")
+
+        if (manager?.hasPermission(usbDevice)!!) {
+            openUSBDevice()
+        } else {
+            println("no permission")
+            requestUSBPermission()
+        }
+    }
+
+    private fun openUSBDevice() {
+        val usbInterface = usbDevice?.getInterface(0)
+        println("endpointCount = ${usbInterface?.endpointCount}")
+        usbEndpointIn = usbInterface?.getEndpoint(0)
+        usbDeviceConnection = manager?.openDevice(usbDevice)
+        if (usbDeviceConnection != null) {
+            startReadData()
+//            if (usbDeviceConnection.claimInterface(usbInterface, false)) {
+//                println("open success")
+//            } else {
+//                usbDeviceConnection.close()
+//                println("connection close")
+//            }
+        } else {
+            println("connection null")
+        }
+    }
+
+    private fun startReadData() {
+        readUSBData()
+        Handler().postDelayed({ startReadData() }, 10000)
+    }
+
+    private fun readUSBData() {
+        if (usbEndpointIn != null) {
+            var bytes = ByteArray(1024)
+            val ret = usbDeviceConnection?.bulkTransfer(usbEndpointIn, bytes, bytes.size, 10000)
+            if (ret != null) {
+                if (ret > 2) {
+                    println("read success")
+                    println(bytes)
+                }
+            }
+        }
+    }
+
+    private fun requestUSBPermission() {
+        usbPermissionReceiver = USBPermissionReceiver()
+        val intent = Intent(ACTION_DEVICE_PERMISSION)
+        val pendingIntent = PendingIntent.getBroadcast(baseContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val intentFilter = IntentFilter(ACTION_DEVICE_PERMISSION)
+        baseContext.registerReceiver(usbPermissionReceiver, intentFilter)
+        manager?.requestPermission(usbDevice, pendingIntent)
+    }
+
+    inner class USBPermissionReceiver : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action
+            if (action == ACTION_DEVICE_PERMISSION) {
+                synchronized(this) {
+                    val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+                    if (usbDevice?.deviceName == device.deviceName) {
+                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                            openUSBDevice()
+                        } else {
+                            println("granted permission failed")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+        const val ACTION_DEVICE_PERMISSION = "ACTION_DEVICE_PERMISSION"
+    }
 
 }
 
