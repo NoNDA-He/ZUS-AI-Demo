@@ -1,6 +1,7 @@
 package us.nonda.aidemo
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -8,10 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbDeviceConnection
-import android.hardware.usb.UsbEndpoint
-import android.hardware.usb.UsbManager
+import android.hardware.usb.*
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
@@ -142,6 +140,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        reading = false
         waveView.release()
         if (usbPermissionReceiver != null) {
             unregisterReceiver(usbPermissionReceiver)
@@ -170,8 +169,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        getAudioDevice()
+//        getAudioDevice()
     }
+
+    /////////////////getAudioDevice/////////
 
     @TargetApi(Build.VERSION_CODES.M)
     fun getAudioDevice() {
@@ -198,65 +199,36 @@ class MainActivity : AppCompatActivity() {
 
     var manager: UsbManager? = null
     var usbDevice: UsbDevice? = null
-    var usbEndpointIn: UsbEndpoint? = null
-    var usbDeviceConnection: UsbDeviceConnection? = null
     var usbPermissionReceiver: USBPermissionReceiver? = null
 
+
+
+    ////////////////////////////////get usb info////////
     // vid = 8137  pid = 152
     private fun testUSB() {
+
         manager = getSystemService(Context.USB_SERVICE) as UsbManager
         for (device in manager?.deviceList?.values!!) {
             if (device.vendorId == 8137 && device.productId == 152) {
                 usbDevice = device
-                println(usbDevice?.deviceName)
+                showLogResult(usbDevice?.deviceName!!)
             }
         }
         if (usbDevice == null) return
         val interfaceCount = usbDevice?.interfaceCount
-        println("interfaceCount = $interfaceCount")
+        showLogResult("interfaceCount = $interfaceCount")
 
         if (manager?.hasPermission(usbDevice)!!) {
-            openUSBDevice()
+            startReadData()
         } else {
-            println("no permission")
+            showLogResult("no permission")
             requestUSBPermission()
         }
     }
 
-    private fun openUSBDevice() {
-        val usbInterface = usbDevice?.getInterface(0)
-        println("endpointCount = ${usbInterface?.endpointCount}")
-        usbEndpointIn = usbInterface?.getEndpoint(0)
-        usbDeviceConnection = manager?.openDevice(usbDevice)
-        if (usbDeviceConnection != null) {
-            startReadData()
-//            if (usbDeviceConnection.claimInterface(usbInterface, false)) {
-//                println("open success")
-//            } else {
-//                usbDeviceConnection.close()
-//                println("connection close")
-//            }
-        } else {
-            println("connection null")
-        }
-    }
-
     private fun startReadData() {
-        readUSBData()
-        Handler().postDelayed({ startReadData() }, 10000)
-    }
-
-    private fun readUSBData() {
-        if (usbEndpointIn != null) {
-            var bytes = ByteArray(1024)
-            val ret = usbDeviceConnection?.bulkTransfer(usbEndpointIn, bytes, bytes.size, 10000)
-            if (ret != null) {
-                if (ret > 2) {
-                    println("read success")
-                    println(bytes)
-                }
-            }
-        }
+        reading = true
+        Thread(ReadThread(manager, usbDevice)).start()
     }
 
     private fun requestUSBPermission() {
@@ -277,14 +249,71 @@ class MainActivity : AppCompatActivity() {
                     val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
                     if (usbDevice?.deviceName == device.deviceName) {
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                            openUSBDevice()
+                            startReadData()
                         } else {
-                            println("granted permission failed")
+                            showLogResult("granted permission failed")
                         }
                     }
                 }
             }
         }
+    }
+
+    var reading = false
+
+    inner class ReadThread(var manager: UsbManager?, var usbDevice: UsbDevice?) : Runnable {
+
+        var usbEndpointIn: UsbEndpoint? = null
+        var usbDeviceConnection: UsbDeviceConnection? = null
+
+        override fun run() {
+            while (reading) {
+                openUSBDevice()
+                Thread.sleep(1000)
+            }
+        }
+
+        private fun openUSBDevice() {
+            if (usbDevice?.interfaceCount == 0) return
+            val usbInterface = usbDevice?.getInterface(6)
+            println("endpointCount = ${usbInterface?.endpointCount}")
+//            for (i in 0 until usbInterface?.endpointCount!!) {
+                if (usbInterface?.endpointCount!! >= 1) {
+                    val endpoint = usbInterface.getEndpoint(0)
+//                    if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK
+//                        && endpoint.direction == UsbConstants.USB_DIR_IN
+//                    ) {
+                        usbEndpointIn = endpoint
+                        println("init usbEndpointIn")
+//                    }
+                }
+//            }
+            usbDeviceConnection = manager?.openDevice(usbDevice)
+            if (usbDeviceConnection != null) {
+                val claimInterface = usbDeviceConnection!!.claimInterface(usbInterface, true)
+                println(claimInterface.toString())
+                readUSBData()
+            } else {
+                println("connection null")
+            }
+        }
+
+        private fun readUSBData() {
+            if (usbEndpointIn != null) {
+                val bytes = ByteArray(64)
+                val ret = usbDeviceConnection?.bulkTransfer(usbEndpointIn, bytes, bytes.size, 1000)
+                if (ret != null) {
+                    if (ret > 2) {
+                        println("read success")
+                    } else {
+                        println("read failed")
+                    }
+                } else {
+                    println("read failed")
+                }
+            }
+        }
+
     }
 
     companion object {
